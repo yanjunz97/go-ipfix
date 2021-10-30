@@ -15,6 +15,7 @@
 package entities
 
 import (
+	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -145,6 +146,19 @@ func TestAddInfoElements(t *testing.T) {
 			t.Logf("data record %x", test.record.GetBuffer())
 		}
 	}
+}
+
+func TestDeleteInfoElements(t *testing.T) {
+	dataRec := NewDataRecord(256, 1, 0, true)
+	dataRec.orderedElementList = make([]InfoElementWithValue, 0)
+	ie := NewIPAddressInfoElement(NewInfoElement("sourceIPv4Address", 8, 18, 0, 4), net.ParseIP("10.0.0.1"))
+	dataRec.AddInfoElement(ie)
+	err := dataRec.DeleteInfoElement("sourceIPv4Address")
+	assert.NoError(t, err)
+	infoElementWithValue, _, _ := dataRec.GetInfoElementWithValue("sourceIPv4Address")
+	assert.Empty(t, infoElementWithValue)
+	err = dataRec.DeleteInfoElement("sourceIPv4Address")
+	assert.Equal(t, fmt.Errorf("record does not have the element sourceIPv4Address"), err)
 }
 
 func TestGetInfoElementWithValue(t *testing.T) {

@@ -61,6 +61,20 @@ func (mr *MockRecordMockRecorder) AddInfoElement(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddInfoElement", reflect.TypeOf((*MockRecord)(nil).AddInfoElement), arg0)
 }
 
+// DeleteInfoElement mocks base method
+func (m *MockRecord) DeleteInfoElement(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteInfoElement", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteInfoElement indicates an expected call of DeleteInfoElement
+func (mr *MockRecordMockRecorder) DeleteInfoElement(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInfoElement", reflect.TypeOf((*MockRecord)(nil).DeleteInfoElement), arg0)
+}
+
 // GetBuffer mocks base method
 func (m *MockRecord) GetBuffer() []byte {
 	m.ctrl.T.Helper()

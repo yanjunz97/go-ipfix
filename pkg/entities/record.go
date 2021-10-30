@@ -41,6 +41,7 @@ type Record interface {
 	GetRecordLength() int
 	GetMinDataRecordLen() uint16
 	GetElementMap() map[string]interface{}
+	DeleteInfoElement(name string) error
 }
 
 type baseRecord struct {
@@ -198,6 +199,19 @@ func (d *dataRecord) AddInfoElement(element InfoElementWithValue) error {
 	return nil
 }
 
+func (d *dataRecord) DeleteInfoElement(name string) error {
+	element, index, exist := d.GetInfoElementWithValue(name)
+	if !exist {
+		return fmt.Errorf("record does not have the element %v", name)
+	}
+	if !d.isDecoding {
+		d.len = d.len - element.GetLength()
+	}
+	d.orderedElementList = append(d.orderedElementList[:index], d.orderedElementList[index+1:]...)
+	d.fieldCount--
+	return nil
+}
+
 func (t *templateRecord) PrepareRecord() error {
 	// Add Template Record Header
 	binary.BigEndian.PutUint16(t.buffer[0:2], t.templateID)
@@ -245,4 +259,8 @@ func (t *templateRecord) GetRecordLength() int {
 
 func (t *templateRecord) GetMinDataRecordLen() uint16 {
 	return t.minDataRecLength
+}
+
+func (t *templateRecord) DeleteInfoElement(name string) error {
+	return fmt.Errorf("template record does not support delete InfoElement")
 }
