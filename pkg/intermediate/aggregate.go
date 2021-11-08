@@ -280,6 +280,8 @@ func (a *AggregationProcess) ForAllExpiredFlowRecordsDo(callback FlowKeyRecordMa
 			}
 			continue
 		}
+		klog.Info("activeExpireTime: ", a.activeExpiryTimeout)
+		klog.Info("inactiveExpireTime: ", a.inactiveExpiryTimeout)
 		err := callback(*pqItem.flowKey, pqItem.flowRecord)
 		if err != nil {
 			return fmt.Errorf("callback execution failed for popped flow record with key: %v, record: %v, error: %v", pqItem.flowKey, pqItem.flowRecord, err)
@@ -605,6 +607,14 @@ func (a *AggregationProcess) ResetStatElementsInRecord(record entities.Record) e
 		}
 	}
 	return nil
+}
+
+func (a *AggregationProcess) SetActiveExpiryTimeout(activeExpiryTimeout time.Duration) {
+	a.activeExpiryTimeout = activeExpiryTimeout
+}
+
+func (a *AggregationProcess) SetInactiveExpiryTimeout(inactiveExpiryTimeout time.Duration) {
+	a.inactiveExpiryTimeout = inactiveExpiryTimeout
 }
 
 func (a *AggregationProcess) addFieldsForStatsAggregation(record entities.Record, fillSrcStats, fillDstStats bool) error {
