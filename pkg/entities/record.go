@@ -41,6 +41,7 @@ type Record interface {
 	GetRecordLength() int
 	GetMinDataRecordLen() uint16
 	GetElementMap() map[string]interface{}
+	LogDebugMessage()
 }
 
 type baseRecord struct {
@@ -158,6 +159,15 @@ func (b *baseRecord) GetElementMap() map[string]interface{} {
 		}
 	}
 	return elements
+}
+
+func (b *baseRecord) LogDebugMessage() {
+	elementMap := b.GetElementMap()
+	klog.InfoS("Logging Debug Message for record...")
+	klog.InfoS("Logging...", "flowEndSeconds", elementMap["flowEndSeconds"])
+	klog.InfoS("Logging...", "sourcePodName", elementMap["sourcePodName"])
+	klog.InfoS("Logging...", "octetTotalCount", elementMap["octetTotalCount"])
+	klog.InfoS("Logging...", "octetDeltaCount", elementMap["octetDeltaCount"])
 }
 
 func (d *dataRecord) PrepareRecord() error {
