@@ -648,6 +648,11 @@ func (a *AggregationProcess) ResetStatElementsInRecord(record entities.Record) e
 	antreaSourceStatsElements := a.aggregateElements.AggregatedSourceStatsElements
 	antreaDestinationStatsElements := a.aggregateElements.AggregatedDestinationStatsElements
 	for i, element := range statsElementList {
+		// TotalCount static elements should be skipped as they are used in the thoughput calculation.
+		isDelta := strings.Contains(element, "Delta")
+		if !isDelta {
+			continue
+		}
 		if ieWithValue, _, exist := record.GetInfoElementWithValue(element); exist {
 			ieWithValue.ResetValue()
 		} else {
