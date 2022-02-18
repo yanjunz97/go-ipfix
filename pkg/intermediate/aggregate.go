@@ -249,9 +249,11 @@ func (a *AggregationProcess) GetRecords(flowKey *FlowKey) []map[string]interface
 }
 
 func (a *AggregationProcess) ForAllExpiredFlowRecordsDo(callback FlowKeyRecordMapCallBack) error {
+	klog.InfoS("Trigger ForAllExpiredFlowRecordsDo")
+	logTime := time.Now()
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
-
+	klog.InfoS("Start to deal with expired flow records", "trigger when", logTime)
 	if a.expirePriorityQueue.Len() == 0 {
 		return nil
 	}
@@ -284,7 +286,7 @@ func (a *AggregationProcess) ForAllExpiredFlowRecordsDo(callback FlowKeyRecordMa
 		klog.InfoS("expire due to", "activeTimeout", pqItem.activeExpireTime.Before(currTime), "inactiveTimeout", pqItem.inactiveExpireTime.Before(currTime))
 		flowEndSeconds, _, _ := pqItem.flowRecord.Record.GetInfoElementWithValue("flowEndSeconds")
 		sourcePodName, _, _ := pqItem.flowRecord.Record.GetInfoElementWithValue("sourcePodName")
-		klog.InfoS("send record", "sourcePodName", sourcePodName, "flowEndSeconds", time.Unix(int64(flowEndSeconds.GetUnsigned32Value()), 0))
+		klog.InfoS("send record", "sourcePodName", sourcePodName.GetStringValue(), "flowEndSeconds", time.Unix(int64(flowEndSeconds.GetUnsigned32Value()), 0))
 
 		err := callback(*pqItem.flowKey, pqItem.flowRecord)
 		if err != nil {
