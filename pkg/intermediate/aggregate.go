@@ -280,6 +280,11 @@ func (a *AggregationProcess) ForAllExpiredFlowRecordsDo(callback FlowKeyRecordMa
 			}
 			continue
 		}
+
+		klog.InfoS("expire due to", "activeTimeout", pqItem.activeExpireTime.Before(currTime), "inactiveTimeout", pqItem.inactiveExpireTime.Before(currTime))
+		flowEndSeconds, _, _ := pqItem.flowRecord.Record.GetInfoElementWithValue("flowEndSeconds")
+		klog.InfoS("send record", "flowKey", *pqItem.flowKey, "flowEndSeconds", time.Unix(int64(flowEndSeconds.GetUnsigned32Value()), 0))
+
 		err := callback(*pqItem.flowKey, pqItem.flowRecord)
 		if err != nil {
 			return fmt.Errorf("callback execution failed for popped flow record with key: %v, record: %v, error: %v", pqItem.flowKey, pqItem.flowRecord, err)
