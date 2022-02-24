@@ -150,6 +150,16 @@ func (a *AggregationProcess) AggregateMsgByFlowKey(message *entities.Message) er
 			klog.Errorf("Invalid data record because decoded values of elements are not valid.")
 			invalidRecs = invalidRecs + 1
 		} else {
+			flowEndSeconds, _, _ := record.GetInfoElementWithValue("flowEndSeconds")
+			sourcePodName, _, _ := record.GetInfoElementWithValue("sourcePodName")
+			octetTotalCount, _, _ := record.GetInfoElementWithValue("octetTotalCount")
+			octetDeltaCount, _, _ := record.GetInfoElementWithValue("octetDeltaCount")
+			klog.InfoS("send record",
+				"sourcePodName", sourcePodName.GetStringValue(),
+				"octetTotalCount", octetTotalCount.GetUnsigned64Value(),
+				"octetDeltaCount", octetDeltaCount.GetUnsigned64Value(),
+				"flowEndSeconds", time.Unix(int64(flowEndSeconds.GetUnsigned32Value()), 0),
+				"received time", time.Now())
 			flowKey, isIPv4, err := getFlowKeyFromRecord(record)
 			if err != nil {
 				return err
@@ -250,10 +260,8 @@ func (a *AggregationProcess) GetRecords(flowKey *FlowKey) []map[string]interface
 
 func (a *AggregationProcess) ForAllExpiredFlowRecordsDo(callback FlowKeyRecordMapCallBack) error {
 	klog.InfoS("Trigger ForAllExpiredFlowRecordsDo")
-	logTime := time.Now()
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
-	klog.InfoS("Start to deal with expired flow records", "trigger when", logTime)
 	if a.expirePriorityQueue.Len() == 0 {
 		return nil
 	}
@@ -286,7 +294,14 @@ func (a *AggregationProcess) ForAllExpiredFlowRecordsDo(callback FlowKeyRecordMa
 		klog.InfoS("expire due to", "activeTimeout", pqItem.activeExpireTime.Before(currTime), "inactiveTimeout", pqItem.inactiveExpireTime.Before(currTime))
 		flowEndSeconds, _, _ := pqItem.flowRecord.Record.GetInfoElementWithValue("flowEndSeconds")
 		sourcePodName, _, _ := pqItem.flowRecord.Record.GetInfoElementWithValue("sourcePodName")
-		klog.InfoS("send record", "sourcePodName", sourcePodName.GetStringValue(), "flowEndSeconds", time.Unix(int64(flowEndSeconds.GetUnsigned32Value()), 0))
+		octetTotalCount, _, _ := pqItem.flowRecord.Record.GetInfoElementWithValue("octetTotalCount")
+		octetDeltaCount, _, _ := pqItem.flowRecord.Record.GetInfoElementWithValue("octetDeltaCount")
+		klog.InfoS("send record",
+			"sourcePodName", sourcePodName.GetStringValue(),
+			"octetTotalCount", octetTotalCount.GetUnsigned64Value(),
+			"octetDeltaCount", octetDeltaCount.GetUnsigned64Value(),
+			"flowEndSeconds", time.Unix(int64(flowEndSeconds.GetUnsigned32Value()), 0),
+			"received time", time.Now())
 
 		err := callback(*pqItem.flowKey, pqItem.flowRecord)
 		if err != nil {
